@@ -1,0 +1,20 @@
+﻿namespace fs_2025_assessment_1_74154.Models;
+
+public class Station
+{
+    public int Number { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Address { get; set; } = string.Empty;
+    public Position Position { get; set; } = new();
+    public int BikeStands { get; set; }
+    public int AvailableBikeStands { get; set; }
+    public int AvailableBikes { get; set; }
+    public string Status { get; set; } = "OPEN";
+    public long LastUpdate { get; set; }
+}
+
+public class Position
+{
+    public double Lat { get; set; }
+    public double Lng { get; set; }
+}
