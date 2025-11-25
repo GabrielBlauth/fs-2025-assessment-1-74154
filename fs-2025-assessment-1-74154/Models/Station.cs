@@ -11,6 +11,25 @@ public class Station
     public int AvailableBikes { get; set; }
     public string Status { get; set; } = "OPEN";
     public long LastUpdate { get; set; }
+
+    // Computed properties
+    public string LastUpdateLocal
+    {
+        get
+        {
+            var dateTime = DateTimeOffset.FromUnixTimeMilliseconds(LastUpdate);
+            var dublinTime = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(dateTime, "Europe/Dublin");
+            return dublinTime.ToString("yyyy-MM-dd HH:mm:ss");
+        }
+    }
+
+    public double Occupancy
+    {
+        get
+        {
+            return BikeStands > 0 ? (double)AvailableBikes / BikeStands : 0;
+        }
+    }
 }
 
 public class Position
