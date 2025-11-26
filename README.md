@@ -35,8 +35,7 @@ A .NET 8 Web API with full CRUD functions, caching, and real-time simulation for
 git clone https://github.com/GabrielBlauth/fs-2025-assessment-1-74154.git
 
 Run the application:
-cd fs-2025-assessment-1-74154
-dotnet run
+cd fs-2025-assessment-1-74154 (dotnet run)
 
 Access the API:
 Swagger UI: https://localhost:7146/swagger
@@ -44,18 +43,18 @@ API Base: https://localhost:7146
 
 API ENDPOINTS
 V1 - File JSON:
-GET /api/v1/stations
-GET /api/v1/stations/{number}
-GET /api/v1/stations/summary
-POST /api/v1/stations
-PUT /api/v1/stations/{number}
+- GET /api/v1/stations
+- GET /api/v1/stations/{number}
+- GET /api/v1/stations/summary
+- POST /api/v1/stations
+- PUT /api/v1/stations/{number}
 
 V2 - CosmosDB:
-GET /api/v2/stations
-GET /api/v2/stations/{number}
-GET /api/v2/stations/summary
-POST /api/v2/stations
-PUT /api/v2/stations/{number}
+- GET /api/v2/stations
+- GET /api/v2/stations/{number}
+- GET /api/v2/stations/summary
+- POST /api/v2/stations
+- PUT /api/v2/stations/{number}
 
 ## TESTING
 Unit Tests:
