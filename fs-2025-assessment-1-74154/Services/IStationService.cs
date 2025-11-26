@@ -9,6 +9,10 @@ namespace fs_2025_assessment_1_74154.Services
         StationSummary GetSummary();
         void UpdateStation(Station station);
         void AddStation(Station station);
+
+        // Add these methods for filtering and caching
+        List<Station> GetFilteredStations(string? status = null, int? minBikes = null, string? search = null);
+        StationSummary GetCachedSummary();
     }
 
     public class StationSummary

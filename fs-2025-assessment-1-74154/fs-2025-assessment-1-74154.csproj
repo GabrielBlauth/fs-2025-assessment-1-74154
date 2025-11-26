@@ -20,4 +20,8 @@
     <Folder Include="Data\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="Tests\fs-2025-assessment-1-74154.Tests.csproj" />
+  </ItemGroup>
+
 </Project>

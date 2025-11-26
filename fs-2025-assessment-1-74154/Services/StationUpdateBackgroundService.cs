@@ -1,21 +1,19 @@
-﻿using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using fs_2025_assessment_1_74154.Models;
+﻿using fs_2025_assessment_1_74154.Models;
 
 namespace fs_2025_assessment_1_74154.Services;
 
 public class StationUpdateBackgroundService : BackgroundService
 {
     private readonly ILogger<StationUpdateBackgroundService> _logger;
-    private readonly IStationService _stationService;
+    private readonly IServiceProvider _serviceProvider;
     private readonly Random _random = new Random();
 
     public StationUpdateBackgroundService(
         ILogger<StationUpdateBackgroundService> logger,
-        IStationService stationService)
+        IServiceProvider serviceProvider)
     {
         _logger = logger;
-        _stationService = stationService;
+        _serviceProvider = serviceProvider;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -26,36 +24,61 @@ public class StationUpdateBackgroundService : BackgroundService
         {
             try
             {
-                UpdateStationsRandomly();
-                await Task.Delay(TimeSpan.FromSeconds(15), stoppingToken);
+                using (var scope = _serviceProvider.CreateScope())
+                {
+                    var stationService = scope.ServiceProvider.GetRequiredService<IStationService>();
+
+                    // Update stations with random data every 30 seconds
+                    await UpdateStationsRandomly(stationService);
+                }
+
+                // Wait for 30 seconds before next update
+                await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating stations");
-                await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
+                _logger.LogError(ex, "Error occurred in Station Update Background Service.");
+                await Task.Delay(TimeSpan.FromSeconds(60), stoppingToken); // Wait longer on error
             }
         }
-
-        _logger.LogInformation("Station Update Background Service stopped.");
     }
 
-    private void UpdateStationsRandomly()
+    private async Task UpdateStationsRandomly(IStationService stationService)
     {
-        var stations = _stationService.GetAllStations();
+        var stations = stationService.GetAllStations();
 
         foreach (var station in stations)
         {
-            if (station.Status != "OPEN") continue;
+            // Skip closed stations
+            if (station.Status == "CLOSED")
+                continue;
 
-            var change = _random.Next(-3, 4);
-            var newBikes = station.AvailableBikes + change;
-            newBikes = Math.Max(0, Math.Min(station.BikeStands, newBikes));
+            // Random changes to simulate real-world data
+            var randomChange = _random.Next(-3, 4); // -3 to +3 bikes
 
-            station.AvailableBikes = newBikes;
-            station.AvailableBikeStands = station.BikeStands - newBikes;
+            var newAvailableBikes = station.AvailableBikes + randomChange;
+            var newAvailableStands = station.BikeStands - newAvailableBikes;
+
+            // Ensure values are within valid range
+            newAvailableBikes = Math.Max(0, Math.Min(station.BikeStands, newAvailableBikes));
+            newAvailableStands = Math.Max(0, Math.Min(station.BikeStands, newAvailableStands));
+
+            // Occasionally change station status (5% chance)
+            if (_random.NextDouble() < 0.05)
+            {
+                station.Status = station.Status == "OPEN" ? "CLOSED" : "OPEN";
+            }
+
+            // Update station data
+            station.AvailableBikes = newAvailableBikes;
+            station.AvailableBikeStands = newAvailableStands;
             station.LastUpdate = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
+            // Update via service
+            stationService.UpdateStation(station);
         }
 
-        _logger.LogDebug("Updated stations availability");
+        _logger.LogInformation("Updated {Count} stations with random data at {Time}",
+            stations.Count, DateTime.Now.ToString("HH:mm:ss"));
     }
 }
