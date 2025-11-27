@@ -22,7 +22,11 @@ namespace fs_2025_assessment_1_74154.Services
             try
             {
                 var json = File.ReadAllText(_jsonFilePath);
-                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                    PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
+                };
                 _stations = JsonSerializer.Deserialize<List<Station>>(json, options) ?? new List<Station>();
             }
             catch (Exception ex)
