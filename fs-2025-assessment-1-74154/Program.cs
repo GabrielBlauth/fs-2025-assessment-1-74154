@@ -15,7 +15,7 @@ builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<IStationService, StationService>();
 
 // Add Background Service - COMMENTED FOR STABLE DEMO
-builder.Services.AddHostedService<StationUpdateBackgroundService>();
+//builder.Services.AddHostedService<StationUpdateBackgroundService>();
 
 var app = builder.Build();
 
