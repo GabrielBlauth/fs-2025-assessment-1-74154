@@ -1,6 +1,6 @@
 fs-2025-assessment-1-74154
-Student Name: Gabriel Blauth de Araujo
-Student Number: 74154
+- Student Name: Gabriel Blauth de Araujo
+- Student Number: 74154
 
 A .NET 8 Web API with full CRUD functions, caching, and real-time simulation for DublinBike station data.
 
