@@ -113,6 +113,6 @@ dotnet test
 - Observe real-time updates every 15 seconds
 
 ### CONFIGURATION
--Switch between V1 and V2 by changing ApiVersion in appsettings.json:
--"V1": Uses JSON file data source
--"V2": Uses Azure Cosmos DB data source
+- Switch between V1 and V2 by changing ApiVersion in appsettings.json:
+- "V1": Uses JSON file data source
+- "V2": Uses Azure Cosmos DB data source
