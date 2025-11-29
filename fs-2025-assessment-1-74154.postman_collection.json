@@ -1,0 +1,565 @@
+{
+	"info": {
+		"_postman_id": "eb8fae8e-cce4-4a68-8aad-7081060ceab3",
+		"name": "fs-2025-assessment-1-74154",
+		"description": "StartFragmentTest collection for DublinBikes API V1 and V2EndFragment",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "42680492"
+	},
+	"item": [
+		{
+			"name": "V1 - File JSON",
+			"item": [
+				{
+					"name": "V1 - GET All Stations",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Status code test\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"// Response structure test - CORRIGIDO\r",
+									"pm.test(\"Response has correct structure\", function () {\r",
+									"    const response = pm.response.json();\r",
+									"    pm.expect(response).to.have.property('version');  \r",
+									"    pm.expect(response).to.have.property('page');\r",
+									"    pm.expect(response).to.have.property('pageSize');\r",
+									"    pm.expect(response).to.have.property('totalCount');\r",
+									"    pm.expect(response).to.have.property('data');     \r",
+									"});\r",
+									"\r",
+									"// Data validation - CORRIGIDO\r",
+									"pm.test(\"Data contains stations\", function () {\r",
+									"    const response = pm.response.json();\r",
+									"    pm.expect(response.data).to.be.an('array');       \r",
+									"    \r",
+									"    if (response.data.length > 0) {\r",
+									"        const station = response.data[0];             \r",
+									"        pm.expect(station).to.have.property('number');\r",
+									"        pm.expect(station).to.have.property('name');\r",
+									"        pm.expect(station).to.have.property('availableBikes');\r",
+									"    }\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/stations?status=OPEN&minBikes=5&search=street&sort=availableBikes&dir=desc&page=1&pageSize=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"stations"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "OPEN"
+								},
+								{
+									"key": "minBikes",
+									"value": "5"
+								},
+								{
+									"key": "search",
+									"value": "street"
+								},
+								{
+									"key": "sort",
+									"value": "availableBikes"
+								},
+								{
+									"key": "dir",
+									"value": "desc"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "V1 - GET Station by Number",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Station has correct structure\", function () {\r",
+									"    const response = pm.response.json();\r",
+									"    pm.expect(response.data).to.have.property('number', 1);    \r",
+									"    pm.expect(response.data).to.have.property('name');         \r",
+									"    pm.expect(response.data).to.have.property('availableBikes'); \r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/stations/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"stations",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "V1 - GET Summary",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Summary has correct data\", function () {\r",
+									"    const response = pm.response.json();\r",
+									"    pm.expect(response.data).to.have.property('totalStations');     \r",
+									"    pm.expect(response.data).to.have.property('totalAvailableBikes'); \r",
+									"    pm.expect(response.data).to.have.property('openStations');      \r",
+									"    pm.expect(response.data.totalStations).to.be.at.least(0);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/stations/summary",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"stations",
+								"summary"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "V1 - POST Create Station",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 Created\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Station created successfully\", function () {\r",
+									"    const response = pm.response.json();\r",
+									"    pm.expect(response.data).to.have.property('number', 991);     \r",
+									"    pm.expect(response.data).to.have.property('name', 'Test Station V1');\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"number\": 991,\r\n    \"name\": \"Test Station V1\",\r\n    \"address\": \"Test Address 123\",\r\n    \"position\": {\r\n        \"lat\": 53.349805,\r\n        \"lng\": -6.26031\r\n    },\r\n    \"bikeStands\": 20,\r\n    \"availableBikes\": 15,\r\n    \"availableBikeStands\": 5,\r\n    \"status\": \"OPEN\",\r\n    \"lastUpdate\": 1704067200000\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/stations",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"stations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "V1 - PUT Update Station",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Station updated successfully\", function () {\r",
+									"    const response = pm.response.json();\r",
+									"    pm.expect(response.data).to.have.property('name', 'Test Station Updated');\r",
+									"    pm.expect(response.data).to.have.property('availableBikes', 10); \r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"number\": 991,\r\n    \"name\": \"Test Station Updated\",\r\n    \"address\": \"Updated Address 456\",\r\n    \"position\": {\r\n        \"lat\": 53.349805,\r\n        \"lng\": -6.26031\r\n    },\r\n    \"bikeStands\": 20,\r\n    \"availableBikes\": 10,\r\n    \"availableBikeStands\": 10,\r\n    \"status\": \"OPEN\",\r\n    \"lastUpdate\": 1704067300000\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/stations/991",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"stations",
+								"991"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "V2 - CosmosDB",
+			"item": [
+				{
+					"name": "V2 - GET All Stations",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Status code test\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"// Response structure test - CORRIGIDO\r",
+									"pm.test(\"Response has correct structure\", function () {\r",
+									"    const response = pm.response.json();\r",
+									"    pm.expect(response).to.have.property('version');  \r",
+									"    pm.expect(response).to.have.property('page');\r",
+									"    pm.expect(response).to.have.property('pageSize');\r",
+									"    pm.expect(response).to.have.property('totalCount');\r",
+									"    pm.expect(response).to.have.property('data');     \r",
+									"});\r",
+									"\r",
+									"// Data validation - CORRIGIDO\r",
+									"pm.test(\"Data contains stations\", function () {\r",
+									"    const response = pm.response.json();\r",
+									"    pm.expect(response.data).to.be.an('array');       \r",
+									"    \r",
+									"    if (response.data.length > 0) {\r",
+									"        const station = response.data[0];             \r",
+									"        pm.expect(station).to.have.property('number');\r",
+									"        pm.expect(station).to.have.property('name');\r",
+									"        pm.expect(station).to.have.property('availableBikes');\r",
+									"    }\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v2/stations?status=OPEN&minBikes=5&search=street&sort=availableBikes&dir=desc&page=1&pageSize=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v2",
+								"stations"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "OPEN"
+								},
+								{
+									"key": "minBikes",
+									"value": "5"
+								},
+								{
+									"key": "search",
+									"value": "street"
+								},
+								{
+									"key": "sort",
+									"value": "availableBikes"
+								},
+								{
+									"key": "dir",
+									"value": "desc"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "V2 - GET Station by Number",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Station has correct structure\", function () {\r",
+									"    const response = pm.response.json();\r",
+									"    pm.expect(response.data).to.have.property('number', 2);    \r",
+									"    pm.expect(response.data).to.have.property('name');         \r",
+									"    pm.expect(response.data).to.have.property('availableBikes'); \r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v2/stations/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v2",
+								"stations",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "V2 - GET Summary",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Summary has correct data\", function () {\r",
+									"    const response = pm.response.json();\r",
+									"    pm.expect(response.data).to.have.property('totalStations');     \r",
+									"    pm.expect(response.data).to.have.property('totalAvailableBikes'); \r",
+									"    pm.expect(response.data).to.have.property('openStations');      \r",
+									"    pm.expect(response.data.totalStations).to.be.at.least(0);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v2/stations/summary",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v2",
+								"stations",
+								"summary"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "V2 - POST Create Station",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 Created\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Station created successfully\", function () {\r",
+									"    const response = pm.response.json();\r",
+									"    pm.expect(response.data).to.have.property('number', 992);    \r",
+									"    pm.expect(response.data).to.have.property('name', 'Test Station V2');\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"number\": 992,\r\n    \"name\": \"Test Station V2\",\r\n    \"address\": \"Test Address 123\",\r\n    \"position\": {\r\n        \"lat\": 53.349805,\r\n        \"lng\": -6.26031\r\n    },\r\n    \"bikeStands\": 20,\r\n    \"availableBikes\": 15,\r\n    \"availableBikeStands\": 5,\r\n    \"status\": \"OPEN\",\r\n    \"lastUpdate\": 1704067200000\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v2/stations",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v2",
+								"stations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "V2 - PUT Update Station",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Station updated successfully\", function () {\r",
+									"    const response = pm.response.json();\r",
+									"    pm.expect(response.data).to.have.property('name', 'Test Station Updated');\r",
+									"    pm.expect(response.data).to.have.property('availableBikes', 10); \r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"number\": 992,\r\n    \"name\": \"Test Station Updated\",\r\n    \"address\": \"Updated Address 456\",\r\n    \"position\": {\r\n        \"lat\": 53.349805,\r\n        \"lng\": -6.26031\r\n    },\r\n    \"bikeStands\": 20,\r\n    \"availableBikes\": 10,\r\n    \"availableBikeStands\": 10,\r\n    \"status\": \"OPEN\",\r\n    \"lastUpdate\": 1704067300000\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v2/stations/992",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v2",
+								"stations",
+								"992"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
