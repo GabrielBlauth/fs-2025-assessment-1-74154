@@ -64,5 +64,5 @@ A .NET 8 Web API with full CRUD functions, caching, real-time simulation, and du
 
 ### INSTALLATION:
 1. Clone the repository:
-git clone https://github.com/GabrielBlauth/fs-2025-assessment-1-74154.git
-cd fs-2025-assessment-1-74154
+- git clone https://github.com/GabrielBlauth/fs-2025-assessment-1-74154.git
+- cd fs-2025-assessment-1-74154
