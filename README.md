@@ -66,3 +66,63 @@ A .NET 8 Web API with full CRUD functions, caching, real-time simulation, and du
 1. Clone the repository:
 - git clone https://github.com/GabrielBlauth/fs-2025-assessment-1-74154.git
 - cd fs-2025-assessment-1-74154
+
+### Configure data source in appsettings.json:
+json
+{
+  "ApiVersion": "V1",  // or "V2" for CosmosDB
+  "CosmosDb": {
+    "ConnectionString": "AccountEndpoint=https://localhost:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==",
+    "DatabaseId": "DublinBikesDb",
+    "ContainerId": "Stations"
+  }
+}
+### Run the application:
+### Access the API:
+-Swagger UI: https://localhost:7146/swagger
+-API Base: https://localhost:7146
+
+### API ENDPOINTS
+V1 - File JSON:
+-GET /api/v1/stations
+-GET /api/v1/stations/{number}
+-GET /api/v1/stations/summary
+-POST /api/v1/stations
+-PUT /api/v1/stations/{number}
+
+V2 - CosmosDB:
+-GET /api/v2/stations
+-GET /api/v2/stations/{number}
+-GET /api/v2/stations/summary
+-POST /api/v2/stations
+-PUT /api/v2/stations/{number}
+
+### Query Parameters:
+-status: OPEN|CLOSED
+-minBikes: integer
+-search: string (name/address)
+-sort: name|availableBikes|occupancy
+-dir: asc|desc
+-page: integer
+-pageSize: integer
+
+### TESTING
+Unit Tests:
+dotnet test
+
+### Postman Testing:
+-Import DublinBikes-API.postman_collection.json into Postman
+-Set environment variable baseUrl to https://localhost:7146
+-Run the collection using Postman Test Runner
+-All tests should pass (409 conflicts are expected for duplicate stations)
+
+### Manual Testing:
+-Test filtering: ?status=OPEN&minBikes=5&search=street
+-Test sorting: ?sort=availableBikes&dir=desc
+-Test pagination: ?page=1&pageSize=10
+-Observe real-time updates every 15 seconds
+
+### CONFIGURATION
+-Switch between V1 and V2 by changing ApiVersion in appsettings.json:
+-"V1": Uses JSON file data source
+-"V2": Uses Azure Cosmos DB data source
