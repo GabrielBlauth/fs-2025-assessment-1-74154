@@ -1,9 +1,20 @@
 using fs_2025_assessment_1_74154.Models;
 using fs_2025_assessment_1_74154.Services;
+using Microsoft.Azure.Cosmos;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -11,11 +22,41 @@ builder.Services.AddSwaggerGen();
 // Add Memory Cache
 builder.Services.AddMemoryCache();
 
-// Add Station Service
-builder.Services.AddSingleton<IStationService, StationService>();
+// Determine API version and configure services accordingly
+var version = builder.Configuration["ApiVersion"] ?? "V1";
+Console.WriteLine($"Starting API with version: {version}");
+
+if (version == "V1")
+{
+    // V1 - JSON File based
+    builder.Services.AddSingleton<IStationService, StationService>();
+}
+else if (version == "V2")
+{
+    // V2 - CosmosDB based
+    builder.Services.AddSingleton(provider =>
+    {
+        var config = provider.GetRequiredService<IConfiguration>();
+        var connectionString = config["CosmosDb:ConnectionString"];
+
+        if (string.IsNullOrEmpty(connectionString))
+        {
+            // Para desenvolvimento, usar um valor padrão
+            Console.WriteLine("WARNING: CosmosDB connection string not configured. Using in-memory fallback.");
+            return null;
+        }
+
+        return new CosmosClient(connectionString, new CosmosClientOptions
+        {
+            ConnectionMode = ConnectionMode.Gateway
+        });
+    });
+
+    builder.Services.AddSingleton<IStationService, CosmoStationService>();
+}
 
 // Add Background Service - COMMENTED FOR STABLE DEMO
-//builder.Services.AddHostedService<StationUpdateBackgroundService>();
+builder.Services.AddHostedService<StationUpdateBackgroundService>();
 
 var app = builder.Build();
 
@@ -26,6 +67,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors("AllowAll");
 app.UseHttpsRedirection();
 app.UseAuthorization();
 

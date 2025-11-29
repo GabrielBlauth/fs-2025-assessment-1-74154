@@ -39,9 +39,9 @@
 									"    \r",
 									"    if (response.data.length > 0) {\r",
 									"        const station = response.data[0];             \r",
-									"        pm.expect(station).to.have.property('Number');\r",
-									"        pm.expect(station).to.have.property('Name');\r",
-									"        pm.expect(station).to.have.property('AvailableBikes');\r",
+									"        pm.expect(station).to.have.property('number');\r",
+									"        pm.expect(station).to.have.property('name');\r",
+									"        pm.expect(station).to.have.property('availableBikes');\r",
 									"    }\r",
 									"});"
 								],
@@ -111,7 +111,7 @@
 									"\r",
 									"pm.test(\"Station has correct structure\", function () {\r",
 									"    const response = pm.response.json();\r",
-									"    pm.expect(response.data).to.have.property('number', 2);    \r",
+									"    pm.expect(response.data).to.have.property('number', 1);    \r",
 									"    pm.expect(response.data).to.have.property('name');         \r",
 									"    pm.expect(response.data).to.have.property('availableBikes'); \r",
 									"});"
@@ -126,7 +126,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/stations/2",
+							"raw": "{{baseUrl}}/api/v1/stations/1",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -134,7 +134,7 @@
 								"api",
 								"v1",
 								"stations",
-								"2"
+								"1"
 							]
 						}
 					},
@@ -196,8 +196,8 @@
 									"\r",
 									"pm.test(\"Station created successfully\", function () {\r",
 									"    const response = pm.response.json();\r",
-									"    pm.expect(response.data).to.have.property('number', 997);     \r",
-									"    pm.expect(response.data).to.have.property('name', 'Test Station Postman');\r",
+									"    pm.expect(response.data).to.have.property('number', 991);     \r",
+									"    pm.expect(response.data).to.have.property('name', 'Test Station V1');\r",
 									"});"
 								],
 								"type": "text/javascript",
@@ -211,7 +211,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"number\": 997,\r\n    \"name\": \"Test Station Postman\",\r\n    \"address\": \"Test Address 123\",\r\n    \"position\": {\r\n        \"lat\": 53.349805,\r\n        \"lng\": -6.26031\r\n    },\r\n    \"bikeStands\": 20,\r\n    \"availableBikes\": 15,\r\n    \"availableBikeStands\": 5,\r\n    \"status\": \"OPEN\",\r\n    \"lastUpdate\": 1704067200000\r\n}",
+							"raw": "{\r\n    \"number\": 991,\r\n    \"name\": \"Test Station V1\",\r\n    \"address\": \"Test Address 123\",\r\n    \"position\": {\r\n        \"lat\": 53.349805,\r\n        \"lng\": -6.26031\r\n    },\r\n    \"bikeStands\": 20,\r\n    \"availableBikes\": 15,\r\n    \"availableBikeStands\": 5,\r\n    \"status\": \"OPEN\",\r\n    \"lastUpdate\": 1704067200000\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -260,7 +260,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"number\": 997,\r\n    \"name\": \"Test Station Updated\",\r\n    \"address\": \"Updated Address 456\",\r\n    \"position\": {\r\n        \"lat\": 53.349805,\r\n        \"lng\": -6.26031\r\n    },\r\n    \"bikeStands\": 20,\r\n    \"availableBikes\": 10,\r\n    \"availableBikeStands\": 10,\r\n    \"status\": \"OPEN\",\r\n    \"lastUpdate\": 1704067300000\r\n}",
+							"raw": "{\r\n    \"number\": 991,\r\n    \"name\": \"Test Station Updated\",\r\n    \"address\": \"Updated Address 456\",\r\n    \"position\": {\r\n        \"lat\": 53.349805,\r\n        \"lng\": -6.26031\r\n    },\r\n    \"bikeStands\": 20,\r\n    \"availableBikes\": 10,\r\n    \"availableBikeStands\": 10,\r\n    \"status\": \"OPEN\",\r\n    \"lastUpdate\": 1704067300000\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -268,7 +268,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/stations/997",
+							"raw": "{{baseUrl}}/api/v1/stations/991",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -276,7 +276,7 @@
 								"api",
 								"v1",
 								"stations",
-								"997"
+								"991"
 							]
 						}
 					},
@@ -316,9 +316,9 @@
 									"    \r",
 									"    if (response.data.length > 0) {\r",
 									"        const station = response.data[0];             \r",
-									"        pm.expect(station).to.have.property('Number');\r",
-									"        pm.expect(station).to.have.property('Name');\r",
-									"        pm.expect(station).to.have.property('AvailableBikes');\r",
+									"        pm.expect(station).to.have.property('number');\r",
+									"        pm.expect(station).to.have.property('name');\r",
+									"        pm.expect(station).to.have.property('availableBikes');\r",
 									"    }\r",
 									"});"
 								],
@@ -403,7 +403,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/v2/stations/2",
+							"raw": "{{baseUrl}}/api/v2/stations/1",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -411,7 +411,7 @@
 								"api",
 								"v2",
 								"stations",
-								"2"
+								"1"
 							]
 						}
 					},
@@ -473,8 +473,8 @@
 									"\r",
 									"pm.test(\"Station created successfully\", function () {\r",
 									"    const response = pm.response.json();\r",
-									"    pm.expect(response.data).to.have.property('number', 997);    \r",
-									"    pm.expect(response.data).to.have.property('name', 'Test Station Postman New');\r",
+									"    pm.expect(response.data).to.have.property('number', 992);    \r",
+									"    pm.expect(response.data).to.have.property('name', 'Test Station V2');\r",
 									"});"
 								],
 								"type": "text/javascript",
@@ -488,7 +488,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"number\": 997,\r\n    \"name\": \"Test Station Postman\",\r\n    \"address\": \"Test Address 123\",\r\n    \"position\": {\r\n        \"lat\": 53.349805,\r\n        \"lng\": -6.26031\r\n    },\r\n    \"bikeStands\": 20,\r\n    \"availableBikes\": 15,\r\n    \"availableBikeStands\": 5,\r\n    \"status\": \"OPEN\",\r\n    \"lastUpdate\": 1704067200000\r\n}",
+							"raw": "{\r\n    \"number\": 992,\r\n    \"name\": \"Test Station V2\",\r\n    \"address\": \"Test Address 123\",\r\n    \"position\": {\r\n        \"lat\": 53.349805,\r\n        \"lng\": -6.26031\r\n    },\r\n    \"bikeStands\": 20,\r\n    \"availableBikes\": 15,\r\n    \"availableBikeStands\": 5,\r\n    \"status\": \"OPEN\",\r\n    \"lastUpdate\": 1704067200000\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -537,7 +537,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"number\": 997,\r\n    \"name\": \"Test Station Updated\",\r\n    \"address\": \"Updated Address 456\",\r\n    \"position\": {\r\n        \"lat\": 53.349805,\r\n        \"lng\": -6.26031\r\n    },\r\n    \"bikeStands\": 20,\r\n    \"availableBikes\": 10,\r\n    \"availableBikeStands\": 10,\r\n    \"status\": \"OPEN\",\r\n    \"lastUpdate\": 1704067300000\r\n}",
+							"raw": "{\r\n    \"number\": 992,\r\n    \"name\": \"Test Station Updated\",\r\n    \"address\": \"Updated Address 456\",\r\n    \"position\": {\r\n        \"lat\": 53.349805,\r\n        \"lng\": -6.26031\r\n    },\r\n    \"bikeStands\": 20,\r\n    \"availableBikes\": 10,\r\n    \"availableBikeStands\": 10,\r\n    \"status\": \"OPEN\",\r\n    \"lastUpdate\": 1704067300000\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -545,15 +545,15 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/stations/997",
+							"raw": "{{baseUrl}}/api/v2/stations/992",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
-								"v1",
+								"v2",
 								"stations",
-								"997"
+								"992"
 							]
 						}
 					},

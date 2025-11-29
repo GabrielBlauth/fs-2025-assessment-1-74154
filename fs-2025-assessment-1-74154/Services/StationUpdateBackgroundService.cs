@@ -28,17 +28,17 @@ public class StationUpdateBackgroundService : BackgroundService
                 {
                     var stationService = scope.ServiceProvider.GetRequiredService<IStationService>();
 
-                    // Update stations with random data every 30 seconds
+                    // Update stations with random data every 15 seconds
                     await UpdateStationsRandomly(stationService);
                 }
 
-                // Wait for 30 seconds before next update
-                await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
+                // Wait for 15 seconds before next update
+                await Task.Delay(TimeSpan.FromSeconds(15), stoppingToken);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred in Station Update Background Service.");
-                await Task.Delay(TimeSpan.FromSeconds(60), stoppingToken); // Wait longer on error
+                await Task.Delay(TimeSpan.FromSeconds(20), stoppingToken); // Wait longer on error
             }
         }
     }

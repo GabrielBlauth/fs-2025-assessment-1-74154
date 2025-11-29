@@ -104,5 +104,57 @@ namespace fs_2025_assessment_1_74154.Services
                 _stations.Add(station);
             }
         }
+
+        // Async methods for interface compatibility - ADDED FOR COSMOSDB
+        public async Task<List<Station>> GetAllStationsAsync()
+        {
+            return await Task.FromResult(_stations);
+        }
+
+        public async Task<Station?> GetStationByNumberAsync(int number)
+        {
+            return await Task.FromResult(_stations.FirstOrDefault(s => s.Number == number));
+        }
+
+        public async Task<Station> CreateStationAsync(Station station)
+        {
+            if (!_stations.Any(s => s.Number == station.Number))
+            {
+                _stations.Add(station);
+            }
+            return await Task.FromResult(station);
+        }
+
+        public async Task<Station> UpdateStationAsync(Station station)
+        {
+            var existing = _stations.FirstOrDefault(s => s.Number == station.Number);
+            if (existing != null)
+            {
+                existing.AvailableBikes = station.AvailableBikes;
+                existing.AvailableBikeStands = station.AvailableBikeStands;
+                existing.LastUpdate = station.LastUpdate;
+                existing.Name = station.Name;
+                existing.Address = station.Address;
+                existing.Status = station.Status;
+                existing.BikeStands = station.BikeStands;
+            }
+            return await Task.FromResult(existing ?? station);
+        }
+
+        public async Task<bool> DeleteStationAsync(int number)
+        {
+            var station = _stations.FirstOrDefault(s => s.Number == number);
+            if (station != null)
+            {
+                _stations.Remove(station);
+                return await Task.FromResult(true);
+            }
+            return await Task.FromResult(false);
+        }
+
+        public async Task<StationSummary> GetSummaryAsync()
+        {
+            return await Task.FromResult(GetSummary());
+        }
     }
 }

@@ -10,9 +10,17 @@ namespace fs_2025_assessment_1_74154.Services
         void UpdateStation(Station station);
         void AddStation(Station station);
 
-        // Add these methods for filtering and caching
+   
         List<Station> GetFilteredStations(string? status = null, int? minBikes = null, string? search = null);
         StationSummary GetCachedSummary();
+
+        // METHODS FOR COSMOSDB COMPATIBILITY
+        Task<List<Station>> GetAllStationsAsync();
+        Task<Station> GetStationByNumberAsync(int number);
+        Task<Station> CreateStationAsync(Station station);
+        Task<Station> UpdateStationAsync(Station station);
+        Task<bool> DeleteStationAsync(int number);
+        Task<StationSummary> GetSummaryAsync();
     }
 
     public class StationSummary

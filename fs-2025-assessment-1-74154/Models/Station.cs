@@ -12,6 +12,8 @@ public class Station
     public string Status { get; set; } = "OPEN";
     public long LastUpdate { get; set; }
 
+    public string id { get; set; } = string.Empty; //PROPERTY FOR COSMOSDB
+
     // Computed properties
     public string LastUpdateLocal
     {
