@@ -1,0 +1,46 @@
+﻿@using fs_2025_assessment_1_74154_App.Models
+@using Microsoft.AspNetCore.Components
+
+@if (Summary is null)
+{
+    <div class="card mb-3">
+        <div class="card-body text-muted">
+            Summary not available.
+        </div>
+    </div>
+}
+else
+{
+    <div class="card mb-3">
+        <div class="card-header">
+            Network summary
+        </div>
+        <div class="card-body">
+            <div class="row text-center">
+                <div class="col-6 mb-2">
+                    <h5 class="mb-0">@Summary.TotalStations</h5>
+                    <small class="text-muted">Stations</small>
+                </div>
+                <div class="col-6 mb-2">
+                    <h5 class="mb-0">@Summary.TotalBikeStands</h5>
+                    <small class="text-muted">Total stands</small>
+                </div>
+                <div class="col-6 mb-2">
+                    <h5 class="mb-0">@Summary.TotalAvailableBikes</h5>
+                    <small class="text-muted">Available bikes</small>
+                </div>
+                <div class="col-6 mb-2">
+                    <h5 class="mb-0">@Summary.OpenStations</h5>
+                    <small class="text-success">Open</small>
+                    <span class="mx-1">/</span>
+                    <span class="text-danger">@Summary.ClosedStations</span>
+                    <small class="text-muted d-block">Closed</small>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public StationSummaryDto? Summary { get; set; }
+}

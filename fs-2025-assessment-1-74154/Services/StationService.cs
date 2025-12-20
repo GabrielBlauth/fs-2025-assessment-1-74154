@@ -10,6 +10,8 @@ namespace fs_2025_assessment_1_74154.Services
         private readonly string _jsonFilePath;
         private readonly IMemoryCache _cache;
 
+        private const string SummaryCacheKey = "stations_summary";
+
         public StationService(IMemoryCache cache)
         {
             _jsonFilePath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "dublinbike.json");
@@ -38,52 +40,59 @@ namespace fs_2025_assessment_1_74154.Services
 
         public List<Station> GetAllStations() => _stations;
 
-        public Station? GetStationByNumber(int number) => _stations.FirstOrDefault(s => s.Number == number);
+        public Station? GetStationByNumber(int number) =>
+            _stations.FirstOrDefault(s => s.Number == number);
 
         public StationSummary GetSummary()
         {
+            var stations = _stations;
+
+            var totalStations = stations.Count;
+            var totalBikeStands = stations.Sum(s => s.BikeStands);
+            var totalAvailableBikes = stations.Sum(s => s.AvailableBikes);
+
+            var openStations = stations.Count(s =>
+                string.Equals(s.Status, "OPEN", StringComparison.OrdinalIgnoreCase));
+
+            var closedStations = stations.Count(s =>
+                string.Equals(s.Status, "CLOSED", StringComparison.OrdinalIgnoreCase));
+
             return new StationSummary
             {
-                TotalStations = _stations.Count,
-                TotalBikeStands = _stations.Sum(s => s.BikeStands),
-                TotalAvailableBikes = _stations.Sum(s => s.AvailableBikes),
-                OpenStations = _stations.Count(s => s.Status == "OPEN"),
-                ClosedStations = _stations.Count(s => s.Status == "CLOSED")
+                TotalStations = totalStations,
+                TotalBikeStands = totalBikeStands,
+                TotalAvailableBikes = totalAvailableBikes,
+                OpenStations = openStations,
+                ClosedStations = closedStations
             };
-        }
-
-        public List<Station> GetFilteredStations(string? status = null, int? minBikes = null, string? search = null)
-        {
-            var cacheKey = $"stations_{status}_{minBikes}_{search}";
-
-            return _cache.GetOrCreate(cacheKey, entry =>
-            {
-                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5);
-
-                var query = _stations.AsEnumerable();
-
-                if (!string.IsNullOrEmpty(status))
-                    query = query.Where(s => s.Status.Equals(status, StringComparison.OrdinalIgnoreCase));
-
-                if (minBikes.HasValue)
-                    query = query.Where(s => s.AvailableBikes >= minBikes.Value);
-
-                if (!string.IsNullOrEmpty(search))
-                    query = query.Where(s =>
-                        (s.Name ?? "").Contains(search, StringComparison.OrdinalIgnoreCase) ||
-                        (s.Address ?? "").Contains(search, StringComparison.OrdinalIgnoreCase));
-
-                return query.ToList();
-            });
         }
 
         public StationSummary GetCachedSummary()
         {
-            return _cache.GetOrCreate("stations_summary", entry =>
+            return _cache.GetOrCreate(SummaryCacheKey, entry =>
             {
                 entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5);
                 return GetSummary();
             });
+        }
+
+        public List<Station> GetFilteredStations(string? status = null, int? minBikes = null, string? search = null)
+        {
+            var query = _stations.AsEnumerable();
+
+            if (!string.IsNullOrEmpty(status))
+                query = query.Where(s =>
+                    string.Equals(s.Status, status, StringComparison.OrdinalIgnoreCase));
+
+            if (minBikes.HasValue)
+                query = query.Where(s => s.AvailableBikes >= minBikes.Value);
+
+            if (!string.IsNullOrEmpty(search))
+                query = query.Where(s =>
+                    (s.Name ?? "").Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                    (s.Address ?? "").Contains(search, StringComparison.OrdinalIgnoreCase));
+
+            return query.ToList();
         }
 
         public void UpdateStation(Station updatedStation)
@@ -91,9 +100,16 @@ namespace fs_2025_assessment_1_74154.Services
             var existing = _stations.FirstOrDefault(s => s.Number == updatedStation.Number);
             if (existing != null)
             {
+                existing.Name = updatedStation.Name;
+                existing.Address = updatedStation.Address;
+                existing.Position = updatedStation.Position;
+                existing.BikeStands = updatedStation.BikeStands;
                 existing.AvailableBikes = updatedStation.AvailableBikes;
                 existing.AvailableBikeStands = updatedStation.AvailableBikeStands;
+                existing.Status = updatedStation.Status;
                 existing.LastUpdate = updatedStation.LastUpdate;
+
+                _cache.Remove(SummaryCacheKey);
             }
         }
 
@@ -102,59 +118,67 @@ namespace fs_2025_assessment_1_74154.Services
             if (!_stations.Any(s => s.Number == station.Number))
             {
                 _stations.Add(station);
+                _cache.Remove(SummaryCacheKey);
             }
         }
 
-        // Async methods for interface compatibility - ADDED FOR COSMOSDB
-        public async Task<List<Station>> GetAllStationsAsync()
+        // -----------------------------
+        // ASYNC METHODS (for interface compatibility)
+        // -----------------------------
+        public Task<List<Station>> GetAllStationsAsync()
         {
-            return await Task.FromResult(_stations);
+            return Task.FromResult(_stations);
         }
 
-        public async Task<Station?> GetStationByNumberAsync(int number)
+        public Task<Station?> GetStationByNumberAsync(int number)
         {
-            return await Task.FromResult(_stations.FirstOrDefault(s => s.Number == number));
+            return Task.FromResult(_stations.FirstOrDefault(s => s.Number == number));
         }
 
-        public async Task<Station> CreateStationAsync(Station station)
+        public Task<Station> CreateStationAsync(Station station)
         {
             if (!_stations.Any(s => s.Number == station.Number))
             {
                 _stations.Add(station);
+                _cache.Remove(SummaryCacheKey);
             }
-            return await Task.FromResult(station);
+            return Task.FromResult(station);
         }
 
-        public async Task<Station> UpdateStationAsync(Station station)
+        public Task<Station> UpdateStationAsync(Station station)
         {
             var existing = _stations.FirstOrDefault(s => s.Number == station.Number);
             if (existing != null)
             {
-                existing.AvailableBikes = station.AvailableBikes;
-                existing.AvailableBikeStands = station.AvailableBikeStands;
-                existing.LastUpdate = station.LastUpdate;
                 existing.Name = station.Name;
                 existing.Address = station.Address;
-                existing.Status = station.Status;
+                existing.Position = station.Position;
                 existing.BikeStands = station.BikeStands;
+                existing.AvailableBikes = station.AvailableBikes;
+                existing.AvailableBikeStands = station.AvailableBikeStands;
+                existing.Status = station.Status;
+                existing.LastUpdate = station.LastUpdate;
+
+                _cache.Remove(SummaryCacheKey);
             }
-            return await Task.FromResult(existing ?? station);
+            return Task.FromResult(existing ?? station);
         }
 
-        public async Task<bool> DeleteStationAsync(int number)
+        public Task<bool> DeleteStationAsync(int number)
         {
             var station = _stations.FirstOrDefault(s => s.Number == number);
             if (station != null)
             {
                 _stations.Remove(station);
-                return await Task.FromResult(true);
+                _cache.Remove(SummaryCacheKey);
+                return Task.FromResult(true);
             }
-            return await Task.FromResult(false);
+            return Task.FromResult(false);
         }
 
-        public async Task<StationSummary> GetSummaryAsync()
+        public Task<StationSummary> GetSummaryAsync()
         {
-            return await Task.FromResult(GetSummary());
+            return Task.FromResult(GetSummary());
         }
     }
 }

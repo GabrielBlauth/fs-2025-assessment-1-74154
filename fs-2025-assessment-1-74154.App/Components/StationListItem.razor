@@ -1,0 +1,38 @@
+﻿@using fs_2025_assessment_1_74154.Models
+@using Microsoft.AspNetCore.Components.Web
+
+<tr tabindex="0"
+    class="table-row"
+    @onclick="() => OnSelected.InvokeAsync(Station)"
+    @onkeydown="OnKeyDown">
+
+    <td>@Station.Number</td>
+    <td>@Station.Name</td>
+    <td>@Station.Address</td>
+
+    <td>
+        @if (Station.Status?.ToUpperInvariant() == "OPEN")
+        {
+            <span class="badge bg-success">OPEN</span>
+        }
+        else
+        {
+            <span class="badge bg-danger">CLOSED</span>
+        }
+    </td>
+
+    <td>@Station.AvailableBikes / @Station.BikeStands</td>
+</tr>
+
+@code {
+    [Parameter] public Station Station { get; set; } = default!;
+    [Parameter] public EventCallback<Station> OnSelected { get; set; }
+
+    private async Task OnKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" || e.Key == " ")
+        {
+            await OnSelected.InvokeAsync(Station);
+        }
+    }
+}

@@ -1,0 +1,344 @@
+﻿@page "/stations"
+@rendermode InteractiveServer
+
+@using fs_2025_assessment_1_74154.Models
+@using fs_2025_assessment_1_74154_App.Models
+@using fs_2025_assessment_1_74154_App.Services
+@inject IStationsApiClient StationsApiClient
+
+<h1>Dublin Bikes Stations</h1>
+
+@if (!string.IsNullOrEmpty(_errorMessage))
+{
+    <div class="alert alert-danger mt-3">
+        @_errorMessage
+    </div>
+}
+
+<StationSummaryPanel Summary="_summary" />
+
+<div class="row mt-3">
+    <!-- Filters sidebar -->
+    <div class="col-md-3">
+        <StationFilters Status="@_status"
+                        MinBikes="_minBikes"
+                        Search="@_search"
+                        OnFiltersChanged="OnFiltersChanged"
+                        OnClear="OnClearFilters" />
+    </div>
+
+    <!-- Stations list -->
+    <div class="col-md-5">
+        <div class="d-flex justify-content-between mb-2">
+            <h5 class="mb-0">Stations</h5>
+            <button class="btn btn-sm btn-primary" @onclick="StartCreate">
+                Add station
+            </button>
+        </div>
+
+        <StationList Stations="_stations"
+                     Page="_page"
+                     TotalPages="_totalPages"
+                     TotalItems="_totalItems"
+                     CurrentSort="_sort"
+                     CurrentDir="_dir"
+                     IsLoading="_isLoading"
+                     ErrorMessage="@_errorMessage"
+                     OnStationSelected="OnStationSelected"
+                     OnSortChanged="OnSortChanged"
+                     OnPageChanged="OnPageChanged" />
+    </div>
+
+    <!-- Detail / Form area -->
+    <div class="col-md-4">
+        @if (_isCreating && _editModel is not null)
+        {
+            <StationForm Model="_editModel"
+                         IsEdit="false"
+                         ApiError="@_formApiError"
+                         OnValidSubmit="HandleCreate"
+                         OnCancel="CancelForm" />
+        }
+        else if (_isEditing && _editModel is not null)
+        {
+            <StationForm Model="_editModel"
+                         IsEdit="true"
+                         ApiError="@_formApiError"
+                         OnValidSubmit="HandleEdit"
+                         OnCancel="CancelForm" />
+        }
+        else
+        {
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="mb-0">Details</h5>
+                @if (_selectedStation != null)
+                {
+                    <div>
+                        <button class="btn btn-sm btn-outline-primary me-1" @onclick="StartEdit">
+                            Edit
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" @onclick="DeleteSelected">
+                            Delete
+                        </button>
+                    </div>
+                }
+            </div>
+
+            <StationDetail Station="_selectedStation" />
+        }
+    </div>
+</div>
+
+@code {
+    private StationSummaryDto? _summary;
+
+    private bool _isCreating;
+    private bool _isEditing;
+    private StationEditModel? _editModel;
+    private string? _formApiError;
+
+    private List<Station> _stations = new();
+    private Station? _selectedStation;
+
+    private int _page = 1;
+    private int _pageSize = 10;
+    private int _totalPages = 1;
+    private int _totalItems = 0;
+
+    private string _sort = "name";
+    private string _dir = "asc";
+
+    // Filters
+    private string? _status = null;
+    private int? _minBikes = null;
+    private string? _search = null;
+
+    private bool _isLoading;
+    private string? _errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadStationsAsync();
+    }
+
+    private async Task LoadStationsAsync()
+    {
+        _isLoading = true;
+        _errorMessage = null;
+
+        try
+        {
+            var result = await StationsApiClient.GetStationsAsync(
+                _status,
+                _minBikes,
+                _search,
+                _sort,
+                _dir,
+                _page,
+                _pageSize);
+
+            _stations = result.Items;
+            _totalItems = result.TotalItems;
+            _totalPages = result.TotalPages;
+
+            // global summary (not filtered)
+            _summary = await StationsApiClient.GetSummaryAsync();
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ex.ToString();
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+
+        if (_selectedStation != null)
+        {
+            _selectedStation = _stations.FirstOrDefault(s => s.Number == _selectedStation.Number);
+        }
+
+        StateHasChanged();
+    }
+
+    private Task OnStationSelected(Station station)
+    {
+        _selectedStation = station;
+        _isCreating = false;
+        _isEditing = false;
+        _formApiError = null;
+        return Task.CompletedTask;
+    }
+
+    private async Task OnSortChanged((string sort, string dir) sortInfo)
+    {
+        _sort = sortInfo.sort;
+        _dir = sortInfo.dir;
+        _page = 1;
+        await LoadStationsAsync();
+    }
+
+    private async Task OnPageChanged(int newPage)
+    {
+        _page = newPage;
+        await LoadStationsAsync();
+    }
+
+    private async Task OnFiltersChanged((string? status, int? minBikes, string? search) filters)
+    {
+        _status = filters.status;
+        _minBikes = filters.minBikes;
+        _search = filters.search;
+
+        _page = 1; // reset to first page when filters change
+        await LoadStationsAsync();
+    }
+
+    private async Task OnClearFilters()
+    {
+        _status = null;
+        _minBikes = null;
+        _search = null;
+
+        _page = 1;
+        await LoadStationsAsync();
+    }
+
+    // ===== CRUD helpers =====
+
+    private StationEditModel ToEditModel(Station s) => new()
+    {
+        Number = s.Number,
+        Name = s.Name ?? string.Empty,
+        Address = s.Address ?? string.Empty,
+        Status = string.IsNullOrWhiteSpace(s.Status) ? "OPEN" : s.Status,
+        BikeStands = s.BikeStands,
+        AvailableBikeStands = s.AvailableBikeStands,
+        AvailableBikes = s.AvailableBikes
+    };
+
+    private Station ToStationEntity(StationEditModel m, Station? existing = null)
+    {
+        return new Station
+        {
+            id = m.Number.ToString(),
+            Number = m.Number,
+            Name = m.Name,
+            Address = m.Address,
+            Status = m.Status,
+            BikeStands = m.BikeStands,
+            AvailableBikeStands = m.AvailableBikeStands,
+            AvailableBikes = m.AvailableBikes,
+            Position = existing?.Position,
+            LastUpdate = existing?.LastUpdate ?? 0,
+            
+        };
+    }
+
+    private void StartCreate()
+    {
+        _isCreating = true;
+        _isEditing = false;
+        _formApiError = null;
+        _selectedStation = null;
+
+        _editModel = new StationEditModel
+        {
+            Status = "OPEN"
+        };
+    }
+
+    private void StartEdit()
+    {
+        if (_selectedStation == null)
+            return;
+
+        _isCreating = false;
+        _isEditing = true;
+        _formApiError = null;
+
+        _editModel = ToEditModel(_selectedStation);
+    }
+
+    private void CancelForm()
+    {
+        _isCreating = false;
+        _isEditing = false;
+        _formApiError = null;
+        // keep selected station for detail view
+    }
+
+    private async Task HandleCreate(StationEditModel model)
+    {
+        _formApiError = null;
+
+        try
+        {
+            var entity = ToStationEntity(model);
+            var created = await StationsApiClient.CreateStationAsync(entity);
+
+            _isCreating = false;
+
+            await LoadStationsAsync();
+
+            _selectedStation = _stations.FirstOrDefault(s => s.Number == created.Number);
+        }
+        catch (InvalidOperationException ex)
+        {
+            _formApiError = ex.Message;
+        }
+        catch (Exception ex)
+        {
+            _formApiError = $"Unexpected error: {ex.Message}";
+        }
+    }
+
+    private async Task HandleEdit(StationEditModel model)
+    {
+        if (_selectedStation == null)
+            return;
+
+        _formApiError = null;
+
+        try
+        {
+            var entity = ToStationEntity(model, _selectedStation);
+            var updated = await StationsApiClient.UpdateStationAsync(model.Number, entity);
+
+            _isEditing = false;
+
+            await LoadStationsAsync();
+
+            _selectedStation = _stations.FirstOrDefault(s => s.Number == updated.Number);
+        }
+        catch (InvalidOperationException ex)
+        {
+            _formApiError = ex.Message;
+        }
+        catch (Exception ex)
+        {
+            _formApiError = $"Unexpected error: {ex.Message}";
+        }
+    }
+
+    private async Task DeleteSelected()
+    {
+        if (_selectedStation == null)
+            return;
+
+        try
+        {
+            await StationsApiClient.DeleteStationAsync(_selectedStation.Number);
+
+            _selectedStation = null;
+            _isEditing = false;
+            _isCreating = false;
+
+            await LoadStationsAsync();
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Failed to delete station: {ex.Message}";
+        }
+    }
+}

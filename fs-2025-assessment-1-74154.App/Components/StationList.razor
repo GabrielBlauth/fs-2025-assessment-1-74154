@@ -1,0 +1,138 @@
+﻿@using fs_2025_assessment_1_74154.Models
+@using Microsoft.AspNetCore.Components
+
+@if (IsLoading)
+{
+    <p>Loading stations...</p>
+}
+else if (!string.IsNullOrEmpty(ErrorMessage))
+{
+    <div class="alert alert-danger">
+        @ErrorMessage
+    </div>
+}
+else if (Stations == null || Stations.Count == 0)
+{
+    <p>No stations found.</p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover table-sm">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>
+                        <button class="btn btn-link p-0"
+                                @onclick="@(() => ChangeSort(SortByName))">
+                            Name @SortIndicator(SortByName)
+                        </button>
+                    </th>
+                    <th>Address</th>
+                    <th>Status</th>
+                    <th>
+                        <button class="btn btn-link p-0"
+                                @onclick="@(() => ChangeSort(SortByAvailableBikes))">
+                            Bikes / Stands @SortIndicator(SortByAvailableBikes)
+                        </button>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var station in Stations)
+                {
+                    <StationListItem Station="station"
+                                     OnSelected="OnSelectStation" />
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mt-2">
+        <div>
+            Page @Page of @TotalPages
+            <span class="text-muted">(@TotalItems stations)</span>
+        </div>
+        <div class="btn-group">
+            <button class="btn btn-sm btn-outline-secondary"
+                    @onclick="PreviousPage"
+                    disabled="@(Page <= 1)">
+                Previous
+            </button>
+            <button class="btn btn-sm btn-outline-secondary"
+                    @onclick="NextPage"
+                    disabled="@(Page >= TotalPages)">
+                Next
+            </button>
+        </div>
+    </div>
+}
+
+@code {
+    private const string SortByName = "name";
+    private const string SortByAvailableBikes = "availablebikes";
+
+    [Parameter] public List<Station> Stations { get; set; } = new();
+
+    [Parameter] public int Page { get; set; }
+    [Parameter] public int TotalPages { get; set; }
+    [Parameter] public int TotalItems { get; set; }
+
+    [Parameter] public string CurrentSort { get; set; } = SortByName;
+    [Parameter] public string CurrentDir { get; set; } = "asc";
+
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public string? ErrorMessage { get; set; }
+
+    [Parameter] public EventCallback<Station> OnStationSelected { get; set; }
+    [Parameter] public EventCallback<(string sort, string dir)> OnSortChanged { get; set; }
+    [Parameter] public EventCallback<int> OnPageChanged { get; set; }
+
+    private Task OnSelectStation(Station station) =>
+        OnStationSelected.InvokeAsync(station);
+
+    private async Task ChangeSort(string sortField)
+    {
+        string newDir;
+
+        if (string.Equals(CurrentSort, sortField, StringComparison.OrdinalIgnoreCase))
+        {
+            newDir = CurrentDir == "asc" ? "desc" : "asc";
+        }
+        else
+        {
+            newDir = "asc";
+        }
+
+        await OnSortChanged.InvokeAsync((sortField, newDir));
+    }
+
+    private MarkupString SortIndicator(string field)
+    {
+        if (!string.Equals(CurrentSort, field, StringComparison.OrdinalIgnoreCase))
+            return (MarkupString)string.Empty;
+
+        var symbol = CurrentDir == "asc" ? "▲" : "▼";
+        return (MarkupString)$"<span class=\"ms-1\">{symbol}</span>";
+    }
+
+    private Task PreviousPage()
+    {
+        if (Page > 1)
+        {
+            return OnPageChanged.InvokeAsync(Page - 1);
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private Task NextPage()
+    {
+        if (Page < TotalPages)
+        {
+            return OnPageChanged.InvokeAsync(Page + 1);
+        }
+
+        return Task.CompletedTask;
+    }
+}

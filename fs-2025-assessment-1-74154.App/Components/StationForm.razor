@@ -1,0 +1,108 @@
+﻿@using fs_2025_assessment_1_74154_App.Models
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Forms
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>@(IsEdit ? "Edit station" : "Add new station")</span>
+        <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="OnCancelClicked">
+            Cancel
+        </button>
+    </div>
+
+    <div class="card-body">
+        @if (!string.IsNullOrEmpty(ApiError))
+        {
+            <div class="alert alert-danger">
+                @ApiError
+            </div>
+        }
+
+        <EditForm Model="Model" OnValidSubmit="HandleValidSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="mb-3">
+                <label class="form-label">Number</label>
+                @if (IsEdit)
+                {
+                    <p class="form-control-plaintext">@Model.Number</p>
+                }
+                else
+                {
+                    <InputNumber class="form-control" @bind-Value="Model.Number" />
+                    <ValidationMessage For="@(() => Model.Number)" />
+                }
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Name</label>
+                <InputText class="form-control" @bind-Value="Model.Name" />
+                <ValidationMessage For="@(() => Model.Name)" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Address</label>
+                <InputText class="form-control" @bind-Value="Model.Address" />
+                <ValidationMessage For="@(() => Model.Address)" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Status</label>
+                <InputSelect class="form-select" @bind-Value="Model.Status">
+                    <option value="OPEN">OPEN</option>
+                    <option value="CLOSED">CLOSED</option>
+                </InputSelect>
+                <ValidationMessage For="@(() => Model.Status)" />
+            </div>
+
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Total stands</label>
+                    <InputNumber class="form-control" @bind-Value="Model.BikeStands" />
+                    <ValidationMessage For="@(() => Model.BikeStands)" />
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Available bikes</label>
+                    <InputNumber class="form-control" @bind-Value="Model.AvailableBikes" />
+                    <ValidationMessage For="@(() => Model.AvailableBikes)" />
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Available stands</label>
+                    <InputNumber class="form-control" @bind-Value="Model.AvailableBikeStands" />
+                    <ValidationMessage For="@(() => Model.AvailableBikeStands)" />
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                @(IsEdit ? "Save changes" : "Create station")
+            </button>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    [Parameter] public StationEditModel Model { get; set; } = new();
+    [Parameter] public bool IsEdit { get; set; }
+
+    [Parameter] public EventCallback<StationEditModel> OnValidSubmit { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+
+    [Parameter] public string? ApiError { get; set; }
+
+    private async Task HandleValidSubmit()
+    {
+        if (OnValidSubmit.HasDelegate)
+        {
+            await OnValidSubmit.InvokeAsync(Model);
+        }
+    }
+
+    private async Task OnCancelClicked()
+    {
+        if (OnCancel.HasDelegate)
+        {
+            await OnCancel.InvokeAsync();
+        }
+    }
+}

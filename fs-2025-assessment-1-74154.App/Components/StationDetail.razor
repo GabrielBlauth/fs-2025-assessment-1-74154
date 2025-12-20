@@ -1,0 +1,83 @@
+﻿@using fs_2025_assessment_1_74154.Models
+
+@if (Station == null)
+{
+    <div class="station-detail empty">
+        <p>Select a station to see details.</p>
+    </div>
+}
+else
+{
+    <section class="station-detail" aria-labelledby="station-detail-title">
+        <h2 id="station-detail-title">@Station.Name</h2>
+        <p class="text-muted">@Station.Address</p>
+
+        <div class="mb-2">
+            <span class="badge @(Station.Status?.ToUpperInvariant() == "OPEN" ? "badge-open" : "badge-closed")">
+                @Station.Status
+            </span>
+        </div>
+
+        <dl class="row">
+            <dt class="col-sm-5">Total stands</dt>
+            <dd class="col-sm-7">@Station.BikeStands</dd>
+
+            <dt class="col-sm-5">Available bikes</dt>
+            <dd class="col-sm-7">@Station.AvailableBikes</dd>
+
+            <dt class="col-sm-5">Available stands</dt>
+            <dd class="col-sm-7">@Station.AvailableBikeStands</dd>
+
+            <dt class="col-sm-5">Occupancy</dt>
+            <dd class="col-sm-7">
+                @OccupancyText
+                <div class="progress mt-1" role="progressbar"
+                     aria-valuenow="@OccupancyPercent"
+                     aria-valuemin="0"
+                     aria-valuemax="100"
+                     aria-label="Station occupancy">
+                    <div class="progress-bar" style="width:@($"{OccupancyPercent}%")"></div>
+                </div>
+            </dd>
+
+            <dt class="col-sm-5">Last update</dt>
+            <dd class="col-sm-7">@LastUpdateDisplay</dd>
+
+            <dt class="col-sm-5">Coordinates</dt>
+            <dd class="col-sm-7">
+                @if (Station.Position != null)
+                {
+                    <span>@Station.Position.Lat, @Station.Position.Lng</span>
+                    <br />
+                    <a target="_blank"
+                       href="https://www.google.com/maps/search/?api=1&query=@Station.Position.Lat,@Station.Position.Lng">
+                        Open in Google Maps
+                    </a>
+                }
+                else
+                {
+                    <span class="text-muted">N/A</span>
+                }
+            </dd>
+        </dl>
+    </section>
+}
+
+@code {
+    [Parameter] public Station? Station { get; set; }
+
+    private double OccupancyPercent =>
+        Station?.BikeStands > 0
+            ? Math.Round((double)Station.AvailableBikes / Station.BikeStands * 100, 0)
+            : 0;
+
+    private string OccupancyText =>
+        Station?.BikeStands > 0
+            ? $"{Station.AvailableBikes} of {Station.BikeStands} bikes in use"
+            : "No capacity information";
+
+    private string LastUpdateDisplay =>
+        Station?.LastUpdateLocal != null
+            ? Station.LastUpdateLocal
+            : "Unknown";
+}

@@ -1,0 +1,108 @@
+﻿@using Microsoft.AspNetCore.Components
+
+<div class="card mb-3">
+    <div class="card-header">
+        Filters
+    </div>
+    <div class="card-body">
+        <!-- Search -->
+        <div class="mb-3">
+            <label class="form-label" for="searchText">Search</label>
+            <input id="searchText"
+                   class="form-control"
+                   placeholder="Name or address..."
+                   @bind="_searchText" />
+        </div>
+
+        <!-- Status -->
+        <div class="mb-3">
+            <label class="form-label" for="statusSelect">Status</label>
+            <select id="statusSelect"
+                    class="form-select"
+                    @bind="_statusSelection">
+                <option value="">All</option>
+                <option value="OPEN">Open</option>
+                <option value="CLOSED">Closed</option>
+            </select>
+        </div>
+
+        <!-- Minimum available bikes -->
+        <div class="mb-3">
+            <label class="form-label" for="minBikes">Min available bikes</label>
+            <input id="minBikes"
+                   class="form-control"
+                   type="number"
+                   min="0"
+                   @bind="_minBikesText" />
+        </div>
+
+        <div class="d-flex justify-content-between">
+            <button class="btn btn-primary"
+                    @onclick="ApplyFilters">
+                Apply filters
+            </button>
+            <button class="btn btn-outline-secondary"
+                    @onclick="ClearFilters">
+                Clear
+            </button>
+        </div>
+    </div>
+</div>
+
+@code {
+    // Incoming values from parent (Stations.razor)
+    [Parameter] public string? Status { get; set; }
+    [Parameter] public int? MinBikes { get; set; }
+    [Parameter] public string? Search { get; set; }
+
+    // Notify parent when filters change
+    [Parameter] public EventCallback<(string? status, int? minBikes, string? search)> OnFiltersChanged { get; set; }
+    [Parameter] public EventCallback OnClear { get; set; }
+
+    // Local UI state
+    private string _statusSelection = "";
+    private string _searchText = "";
+    private string? _minBikesText;
+
+    protected override void OnParametersSet()
+    {
+        _statusSelection = Status ?? "";
+        _searchText = Search ?? "";
+        _minBikesText = MinBikes?.ToString();
+    }
+
+    private async Task ApplyFilters()
+    {
+        int? min = null;
+        if (int.TryParse(_minBikesText, out var parsed))
+        {
+            if (parsed >= 0)
+                min = parsed;
+        }
+
+        string? status = string.IsNullOrWhiteSpace(_statusSelection)
+            ? null
+            : _statusSelection;
+
+        string? search = string.IsNullOrWhiteSpace(_searchText)
+            ? null
+            : _searchText;
+
+        if (OnFiltersChanged.HasDelegate)
+        {
+            await OnFiltersChanged.InvokeAsync((status, min, search));
+        }
+    }
+
+    private async Task ClearFilters()
+    {
+        _statusSelection = "";
+        _searchText = "";
+        _minBikesText = null;
+
+        if (OnClear.HasDelegate)
+        {
+            await OnClear.InvokeAsync();
+        }
+    }
+}
